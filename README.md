@@ -5,4 +5,4 @@ Mini-projet : interprétation et compilation du langage IMP
 
 ---
 
-Sujet : <a href="dept-info.labri.fr/ENSEIGNEMENT/compi/sujet_minipro.pdf">LINK</a>
+Sujet : http://dept-info.labri.fr/ENSEIGNEMENT/compi/sujet_minipro.pdf
