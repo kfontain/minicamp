@@ -2,18 +2,17 @@ CC= gcc
 
 CFLAGS:= -std=c99 -Wall -g
 
+all: iimp
 
-all: exo3 exo4 exo5
+iimp.yacc.c: iimp.y
+	bison $<
 
-%c:%y
-	bison  $<
+iimp.lex.c: iimp.l
+	flex $<
 
-%c:%l
-	flex  -o $@ $<
-
-%o:%c
+%o: %c
 	$(CC) $(CFLAGS) -o $@ $<
 
-
-exo5: exo5.lex.o exo5.yacc.o
+iimp: iimp.yacc.o iimp.lex.o
 	$(CC) $(CFLAGS) $^ -o $@
+	rm *.c *.o
