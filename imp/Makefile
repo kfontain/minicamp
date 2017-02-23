@@ -4,7 +4,7 @@ CFLAGS:= -std=c99 -Wall
 
 all: iimp
 
-iimp.tab.c iimp.tab.h: iimp.y
+iimp.tab.c iimp.tab.h: iimp.y 
 		bison -d iimp.y
 
 lex.yy.c: iimp.l iimp.tab.h

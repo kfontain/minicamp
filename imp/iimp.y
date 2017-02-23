@@ -2,6 +2,9 @@
   #include <stdio.h>
   #include <stdlib.h>
   
+
+  #define YYSTYPE Var
+  
   extern int yylex();
   extern int yyparse();
   extern FILE* yyin;
@@ -9,17 +12,15 @@
   void yyerror(const char* s);
 %}
 
-%union {
-    int number;
-    char *string;
-}
 
-%token <number> I V
+%union { Var var}
+
+%token<var> I V
 %token If Th El Wh Do Af Sk
 
 %left '('
 
-%type <number> E T F C
+%type<var> C E F T 
 
 %start start
 
@@ -29,7 +30,7 @@ start : C
       ;
 
 E : E '+' T           { $$ = $1 + $3; }
-  | E '-' T           { $$ = $1 + $3; }
+  | E '-' T           { $$ = $1 - $3; }
   | T                 { $$ = $1; }
   ;
 
