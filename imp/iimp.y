@@ -1,44 +1,70 @@
 %{
   #include <stdio.h>
-  void yyerror(char* s);
+  #include <stdlib.h>
+  
+  extern int yylex();
+  extern int yyparse();
+  extern FILE* yyin;
+
+  void yyerror(const char* s);
 %}
+
+%union {
+    int number;
+    char *string;
+}
+
+%token <number> I V
+%token If Th El Wh Do Af Sk
+
+%left '('
+
+%type <number> E T F C
+
 %start start
-%token Af Sk Se If Th El Wh Do Pl Mo Mu I V
 
 %%
-start: E C F
 
-E: E Pl T
- | E Mo T
- | T
- ;
+start : C
+      ;
 
-T: T Mu F
- | F
- ;
+E : E '+' T           { $$ = $1 + $3; }
+  | E '-' T           { $$ = $1 + $3; }
+  | T                 { $$ = $1; }
+  ;
 
-F: '(' E ')'
- | I
- | V
- ;
+T : T '*' F           { $$ = $1 * $3; }
+  | F                 { $$ = $1; }
+  ;
 
-C : V Af E
-  | Sk
-  | '(' C ')'
-  | If E Th C El C
-  | Wh E Do C
-  |  C Se C
+F : '(' E ')'         { $$ = $2; }
+  | I                 { $$ = $1; }
+  | V                 { $$ = $1; }
+  ;
+
+C : V Af E            { $1 = $3; }
+  | Sk                { ; }
+  | '(' C ')'         { $$ = $2; }
+  | If E Th C El C    { if($2) $$ = $4; else $$ = $6; }
+  | Wh E Do C         { while($2) $$ = $4; }
+  | C ';' C           { $$ = $1; $$ = $3; }
   ;
 
 %%
 
-void yyerror(char* s){
-  fprintf(stderr,"** error %s **\n ",s);
+int main()
+{
+  yyin = stdin;
+
+  do {
+    yyparse();
+  } while(!feof(yyin));
+
+  return 0;
 }
 
-void yywrap(){
-}
-
-void main(){
-  yyparse();
+void yyerror(const char* s)
+{
+  fprintf(stderr, "Parse error : %s\n", s);
+  exit(1);
 }

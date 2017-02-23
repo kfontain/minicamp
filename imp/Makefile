@@ -1,20 +1,17 @@
 CC= gcc
 
-CFLAGS:= -std=c99 -Wall 
+CFLAGS:= -std=c99 -Wall
 
 all: iimp
 
-iimp.yacc.c:iimp.y
-	bison  -o $@ $<
+iimp.tab.c iimp.tab.h: iimp.y
+		bison -d iimp.y
 
-iimp.lex.c:iimp.l
-	flex -o $@ $<
+lex.yy.c: iimp.l iimp.tab.h
+		flex iimp.l
 
-%o: %c
-	$(CC) $(CFLAGS) -o $@ $<
-
-iimp: iimp.lex.o iimp.yacc.o
-	$(CC) $(CFLAGS) -o $@ $^
+iimp: lex.yy.c iimp.tab.c iimp.tab.h
+		gcc -o iimp iimp.tab.c lex.yy.c
 
 clean:
-	rm *o *c *~ *#
+		rm iimp iimp.tab.c iimp.tab.h lex.yy.c
