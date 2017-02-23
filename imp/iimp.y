@@ -1,32 +1,30 @@
 %{
   #include <stdio.h>
   #include <stdlib.h>
-  
 
-  #define YYSTYPE Var
-  
   extern int yylex();
   extern int yyparse();
   extern FILE* yyin;
 
   void yyerror(const char* s);
+
+  id = 0;
 %}
 
+%union {
+    int value;
+    char *name;
+}
 
-%union { Var var}
-
-%token<var> I V
+%token <value> I
+%token <name> V
 %token If Th El Wh Do Af Sk
 
 %left '('
 
-%type<var> C E F T 
-
-%start start
-
 %%
 
-start : C
+start : C '\n'        { printf("%d\n", $1); }
       ;
 
 E : E '+' T           { $$ = $1 + $3; }
@@ -43,7 +41,7 @@ F : '(' E ')'         { $$ = $2; }
   | V                 { $$ = $1; }
   ;
 
-C : V Af E            { $1 = $3; }
+C : V Af E            { sym[$1] = $3; }
   | Sk                { ; }
   | '(' C ')'         { $$ = $2; }
   | If E Th C El C    { if($2) $$ = $4; else $$ = $6; }

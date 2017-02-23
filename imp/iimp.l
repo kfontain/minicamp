@@ -21,8 +21,8 @@ do            { return Do; }
 :=            { return Af; }
 skip          { return Sk; }
 
-{num}         { yylval.number = atoi(yytext); return I; }
-{var}         { yylval.string = strdup(yytext); return V; }
+{num}         { yylval = atoi(yytext); return I; }
+{var}         { yylval = strdup(yytext); return V; }
 .             { return (int) yytext[0]; }
 
 %%
