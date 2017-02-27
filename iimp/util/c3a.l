@@ -40,16 +40,16 @@ variable  VAchiffre|[A-Za-z0-9\-\_]*
 
 <Argument1>{chiffre}|{constante}|{variable}     {switch( OP ){
                                                        case 0:
-                                                          ARG1 = yytext;
+					                  strcpy(yytext, ARG1);
                                                           break;
                                                        case 1:
-                                                          ARG1 = yytext;
+                                                          strcpy(yytext, ARG1);
                                                           break;
                                                        case 2:
-                                                          ARG1 = yytext;
+                                                          strcpy(yytext, ARG1);
                                                           break;
                                                        case 3:
-                                                          affecter la valeur de argument a la structure de nom de variable argument1;
+                                                          strcpy(yytext, ARG1);
                                                           break;
                                                        case 7:
                                                           if ( la valeur de varible == 0){ BEGIN Destination;}else{ BEGIN Etiquette;}
