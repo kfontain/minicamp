@@ -1,6 +1,7 @@
 %{
   #include <stdio.h>
   #include <stdlib.h>
+  #include <stdbool.h>
 
   extern int yylex();
   extern int yyparse();
@@ -13,11 +14,12 @@
 
 %union {
     int value;
-    char *name;
+    char *id;
+    struct variable;
 }
 
 %token <value> I
-%token <name> V
+%token <id> V
 %token If Th El Wh Do Af Sk
 
 %left '('
