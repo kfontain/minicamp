@@ -13,16 +13,11 @@ num [1-9][0-9]*
 
 %%
 
-if            { return If; }
-then          { return Th; }
-else          { return El; }
-while         { return Wh; }
-do            { return Do; }
-:=            { return Af; }
-skip          { return Sk; }
+"+"             { return Pl; }
+"-"             { return Mo; }
+"\n"            { return Rt; }
 
-{num}         { yylval = atoi(yytext); return I; }
-{var}         { yylval = strdup(yytext); return V; }
+{num}         { yylval.val = atoi(yytext); return I; }
 .             { return (int) yytext[0]; }
 
 %%
