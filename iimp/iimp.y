@@ -13,9 +13,9 @@
     int val;
 }
 
-%token Pl Mo Rt
+%token Pl Mo Rt Mu
 %token <val> I
-%type <val> E
+%type <val> E T F
 
 %left '('
 
@@ -25,10 +25,15 @@ line :
      | line E Rt    { printf("%d\n", $2); }
      ;
 
-E : I Pl I          { $$ = $1 + $3; }
-  | I Mo I          { $$ = $1 - $3; }
-  | I               { $$ = $1; }
+E : I Pl T          { $$ = $1 + $3; }
+  | I Mo T          { $$ = $1 - $3; }
+  | T               { $$ = $1; }
   ;
+
+T : T Mu F          { $$ = $1 * $3; }
+  | F               { $$ = $1; }
+
+F : I               { $$ = $1; }
 
 %%
 

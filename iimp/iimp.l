@@ -15,6 +15,7 @@ num [1-9][0-9]*
 
 "+"             { return Pl; }
 "-"             { return Mo; }
+"*"             { return Mu; }
 "\n"            { return Rt; }
 
 {num}         { yylval.val = atoi(yytext); return I; }
