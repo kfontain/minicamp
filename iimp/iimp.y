@@ -21,11 +21,8 @@
 
 %%
 
-calc :
-     | calc line
-     ;
-
-line : E Rt         { printf("%d\n", $1); }
+line :
+     | line E Rt    { printf("%d\n", $2); }
      ;
 
 E : I Pl I          { $$ = $1 + $3; }
