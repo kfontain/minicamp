@@ -20,13 +20,14 @@ num [1-9][0-9]*
 skip            { return Sk; }
 ";"             { return Se; }
 if              { return If; }
+then            { return Th; }
 else            { return El; }
 while           { return Wh; }
 do              { return Do; }
 :=              { return Af; }
 
 {num}           { yylval.val = atoi(yytext); return I; }
-{var}           { yylval.id = atoi(yytext); return V; }
+{var}           { yylval.id  = atoi(yytext); return V; }
 .               { return (int) yytext[0]; }
 
 %%
