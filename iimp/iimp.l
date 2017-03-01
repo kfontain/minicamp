@@ -8,7 +8,7 @@
 
 %}
 
-var [A-Za-z][A-Za-z0-9]*
+var [A-Za-z]
 num [1-9][0-9]*
 
 %%
@@ -17,8 +17,16 @@ num [1-9][0-9]*
 "-"             { return Mo; }
 "*"             { return Mu; }
 "\n"            { return Rt; }
+skip            { return Sk; }
+";"             { return Se; }
+if              { return If; }
+else            { return El; }
+while           { return Wh; }
+do              { return Do; }
+:=              { return Af; }
 
-{num}         { yylval.val = atoi(yytext); return I; }
-.             { return (int) yytext[0]; }
+{num}           { yylval.val = atoi(yytext); return I; }
+{var}           { yylval.id = atoi(yytext); return V; }
+.               { return (int) yytext[0]; }
 
 %%
