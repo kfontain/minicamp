@@ -1,6 +1,6 @@
 %{
-#include "environ.h"
-#include "bilquad.h"
+#include "/util/environ.h"
+#include "/util/bilquad.h"
 
 int  OP;
 char *ETIQ = NULL, *ARG1 = NULL, *ARG2 = NULL, *RES = NULL;
@@ -24,7 +24,7 @@ variable  VAchiffre|[A-Za-z0-9\-\_]*
 
 %%
 
-\n {BEGIN Etiquette;}
+* {BEGIN Etiquette;}
 
 <Etiquette>etiquette {BEGIN Operateur;}
 
@@ -77,11 +77,17 @@ variable  VAchiffre|[A-Za-z0-9\-\_]*
 <Destination>{etiquette}                {if( (OP == 6) || (OP == 7)) rechbq(yytext, bq); }
 
 <Destination>{constante}|{variable}              {RES = eval( OP, ARG1, ARG2); };}
-
+<Destination>\n           { QUAD q = creer_quad(ETIQ, ARG1, ARG2, RES); BILQUAD bq2 = creer_bilquad(q); bq = concatq(bq,bq2); BEGIN Etiquette;}
 
 %%
 
 int main()
 {
+printf("************Code C3A*********\n");
+ecrire_bilquad(bq);
+printf("\n***********Code Y86 *********\n);
+debut_y86();
+
+fin_y86();
 yylex();
 }

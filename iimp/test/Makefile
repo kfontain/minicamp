@@ -2,16 +2,30 @@ CC= gcc
 
 CFLAGS:= -std=c99 -Wall
 
-all: InterIMP
+.phony:clean cleanex
+
+all: InterIMP InterC3A
+
 
 InterIMP.tab.c InterIMP.tab.h: InterIMP.y ../util/environ.h
 		bison -d InterIMP.y	
 
-lex.yy.c: InterIMP.l InterIMP.tab.h ../util/environ.h
+InterIMP.yy.c: InterIMP.l InterIMP.tab.h ../util/environ.h
 		flex InterIMP.l
+		mv lex.yy.c $@
 
-InterIMP: lex.yy.c InterIMP.tab.c ../util/environ.c InterIMP.tab.h ../util/environ.h
-		gcc -g -o InterIMP InterIMP.tab.c lex.yy.c ../util/environ.c
+c3a.c: c3a.l ../util/environ.h ../util/bilquad.h
+		flex c3a.l
+		mv lex.yy.c $@
+
+InterIMP: InterIMP.yy.c InterIMP.tab.c ../util/environ.c InterIMP.tab.h ../util/environ.h
+		gcc -o InterIMP InterIMP.tab.c InterIMP.yy.c ../util/environ.c
+
+InterC3A: c3a.c ../util/environ.c ../util/bilquad.c
+		gcc -o InterC3A $^
 
 clean:
-		rm InterIMP InterIMP.tab.c InterIMP.tab.h lex.yy.c
+		rm c3a.c InterIMP.tab.c InterIMP.tab.h InterIMP.yy.c
+
+cleanex:
+		rm InterC3A InterIMP

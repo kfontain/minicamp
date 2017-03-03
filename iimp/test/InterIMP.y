@@ -3,6 +3,7 @@
   #include <stdlib.h>
   #include "../util/environ.h"
 
+  void yyerror(const char* s);
   extern int yylex();
   ENV env;
 %}
@@ -26,7 +27,7 @@
 
 debut: C            { ecrire_env(env); }
 
-C : Co Se Co        { $$ = $1 ; $$ = $3; }
+C : C Se Co        { $$ = $1 ; $$ = $3; }
   | Co              { $$ = $1;}
   | FIN             {return 0;}
   ;
@@ -42,14 +43,14 @@ T : T MU F          { $$ = eval(Mu, $1, $3);  }
 
 F : '(' E ')'       { $$ = $2; }
   | I               { $$ = $1; }
-  | V               { $$ = valch(env, $1); printf("valeur de %s: %d\n",$1,valch(env, $1));}
+  | V               { $$ = valch(env, $1); }
   ;
 
 Co : V AF E          { initenv(&env,$1); affect(env,$1, $3); }
-  | SK               { ; }
+| SK C              { $$ = $2; }
   | '(' C ')'        { $$ = $2; }
   | If E Th C El Co  { if($2){ $$ = $4;} else{ $$ = $6;}; }
-  | Wh Co Do C       { while($2){ $$ = $4;} }
+  | Wh E Do Co       { while($2){ $$ = $4;} }
   ;
 %%
 
