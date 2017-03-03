@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "iimp.tab.h"
+#include "InterIMP.tab.h"
 
 %}
 
@@ -17,7 +17,6 @@ num [1-9][0-9]*|0
 \+              { return PL; }
 \-              { return MO; }
 \*              { return MU; }
-\n              { return Rt; }
 skip            { return SK; }
 \;              { return Se; }
 if              { return If; }
@@ -30,5 +29,5 @@ do              { return Do; }
 {num}           { yylval.val = atoi(yytext); return I; }
 {var}           { yylval.string = strdup(yytext); return V; }
 
-.               {;}
+.|\n               {;}
 %%
