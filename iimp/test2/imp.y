@@ -28,33 +28,33 @@
 
 %%
 
-debut: C            { execute($1);}
+debut : C             { execute($1); }
 
-C : C Se Co         { $$ = newast(Se, $1, $3, NULL); }
-  | Co              {;}
-  | FIN             {return 0;}
+C : C Se Co           { $$ = newast(Se, $1, $3, NULL); }
+  | Co                {;}
+  | FIN               {return 0;}
   ;
 
-E : E PL T          { $$ = newast(Pl, $1, $3, NULL); }
-  | E MO T          { $$ = newast(Mo, $1, $3, NULL); }
-  | T               { }
+E : E PL T            { $$ = newast(Pl, $1, $3, NULL); }
+  | E MO T            { $$ = newast(Mo, $1, $3, NULL); }
+  | T                 { }
   ;
 
-T : T MU F          { $$ = newast(Mu, $1, $3, NULL); }
-  | F               { ; }
+T : T MU F            { $$ = newast(Mu, $1, $3, NULL); }
+  | F                 { ; }
   ;
 
-F : '(' E ')'       { $$ = $2; }
-  | I               { $$ = newnum(I, $1); }
-  | V               { $$ = newvar(V, $1); }
+F : '(' E ')'         { $$ = $2; }
+  | I                 { $$ = newnum(I, $1); }
+  | V                 { $$ = newvar(V, $1); }
   ;
 
-Co : V AF E          { struct ast* var = newvar(V,$1); $$ = newast(Af, var, $3, NULL); }
-  | SK C             { $$ = newast(SK, NULL, NULL, NULL); }
-  | '(' C ')'        { $$ = $2; }
-  | If E Th C El Co  { $$ = newast(If, $2, $3, $5); }
-  | Wh E Do Co       { }
-  ;
+Co : V AF E           { struct ast* var = newvar(V,$1); $$ = newast(Af, var, $3, NULL); }
+   | SK C             { $$ = newast(SK, NULL, NULL, NULL); }
+   | '(' C ')'        { $$ = $2; }
+   | If E Th C El Co  { $$ = newast(If, $2, $3, $5); }
+   | Wh E Do Co       { }
+   ;
 
 %%
 
