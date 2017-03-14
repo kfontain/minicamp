@@ -73,7 +73,7 @@ evalAST(struct ast *a)
   }*/
 
 /* Suppression AST */
-treefree(struct ast *a)
+void treefree(struct ast *a)
 {
   switch(a->nodetype) {
     /* three subtrees */
