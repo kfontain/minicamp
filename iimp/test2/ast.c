@@ -20,7 +20,7 @@ struct ast* newnum(int nodetype, double val)
   struct num *n = malloc(sizeof(struct num));
   if(!n)
     {
-      fprintf(stderr,"out of space");
+      fprintf(stderr,"out of memory \n");
       exit(0);
     }
   n->nodetype = nodetype;
@@ -118,13 +118,13 @@ void compY86(struct ast *a)
 /* Executable */
 void execute(struct ast *a)
 {
-readAST(a);
-printf("\n");
-//evalAST(a);
-//printf("\n");
-compC3A(a);
-printf("\n");
-compY86(a);
-printf("\n");
-treefree(a);
+    readAST(a);
+    printf("\n");
+    //evalAST(a);
+    //printf("\n");
+    compC3A(a);
+    printf("\n");
+    compY86(a);
+    printf("\n");
+    treefree(a);
 }
