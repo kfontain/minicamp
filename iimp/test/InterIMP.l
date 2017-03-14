@@ -13,7 +13,7 @@ num [1-9][0-9]*|0
 
 %%
 
-<<EOF>>         {return FIN;}
+
 \+              { return PL; }
 \-              { return MO; }
 \*              { return MU; }
@@ -29,5 +29,5 @@ do              { return Do; }
 {num}           { yylval.val = atoi(yytext); return I; }
 {var}           { yylval.string = strdup(yytext); return V; }
 
-.|\n               {;}
+[.\n ]          {;}
 %%
