@@ -13,12 +13,12 @@ num [1-9][0-9]*|0
 
 %%
 
-<<EOF>>         {return FIN;}
-\+              { return PL; }
-\-              { return MO; }
-\*              { return MU; }
+<<EOF>>         { return FIN; }
+"+"             { return PL; }
+"-"             { return MO; }
+"*"             { return MU; }
 skip            { return SK; }
-\;              { return Se; }
+";"             { return Se; }
 if              { return If; }
 then            { return Th; }
 else            { return El; }
@@ -26,8 +26,11 @@ while           { return Wh; }
 do              { return Do; }
 :=              { return AF; }
 
-{num}           { yylval.val = atoi(yytext); return I; }
-{var}           { yylval.id = strdup(yytext); return V; }
+{num}           { yylval.val =   atoi(yytext); return I; }
+{var}           { yylval.id  = strdup(yytext); return V; }
 
-[.\n ]          {;}
+
+[ \t\n]         { /* ignore whitespace */ }
+[.]             { ; }
+
 %%

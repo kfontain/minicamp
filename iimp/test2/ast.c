@@ -20,7 +20,7 @@ struct ast* newnum(int nodetype, double val)
   struct num *n = malloc(sizeof(struct num));
   if(!n)
     {
-      fprintf(stderr,"out of space");
+      fprintf(stderr,"out of memory \n");
       exit(0);
     }
   n->nodetype = nodetype;
@@ -73,7 +73,7 @@ evalAST(struct ast *a)
   }*/
 
 /* Suppression AST */
-treefree(struct ast *a)
+void treefree(struct ast *a)
 {
   switch(a->nodetype) {
     /* three subtrees */
@@ -105,7 +105,22 @@ treefree(struct ast *a)
 /* traduction IMP -> C3A */
 void compC3A(struct ast *a)
 {
-  //Todo
+    printf("Code C3A :\n");
+    printf("----------\n");
+
+    while (a->l != NULL) {
+        switch (a->nodetype) {
+            case Pl  : printf("nodetype : Pl ");
+            case Mo  : printf("nodetype : Mo ");
+            case Mu  : printf("nodetype : Mu ");
+            case Af  : printf("nodetype : Af ");
+            default : break;
+        }
+        printf("%s ", ((struct var*)a->l)->id);
+        printf("%s ", ((struct var*)a->m)->id);
+        printf("\n");
+        a = a->l;
+    }
 }
 
 /* traduction C3A -> Y86 */
@@ -118,13 +133,13 @@ void compY86(struct ast *a)
 /* Executable */
 void execute(struct ast *a)
 {
-readAST(a);
-printf("\n");
-//evalAST(a);
-//printf("\n");
-compC3A(a);
-printf("\n");
-compY86(a);
-printf("\n");
-treefree(a);
+    readAST(a);
+    printf("\n");
+    //evalAST(a);
+    //printf("\n");
+    compC3A(a);
+    printf("\n");
+    compY86(a);
+    printf("\n");
+    treefree(a);
 }

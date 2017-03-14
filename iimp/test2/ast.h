@@ -17,12 +17,12 @@ struct ast {
   struct ast *r;
 };
 
-struct num{
+struct num {
   int nodetype;
   double val;
 };
 
-struct var{
+struct var {
   int nodetype;
   char* id;
 };
