@@ -14,11 +14,11 @@ num [1-9][0-9]*|0
 %%
 
 <<EOF>>         { return FIN; }
-\+              { return PL; }
-\-              { return MO; }
-\*              { return MU; }
+"+"             { return PL; }
+"-"             { return MO; }
+"*"             { return MU; }
 skip            { return SK; }
-\;              { return Se; }
+";"             { return Se; }
 if              { return If; }
 then            { return Th; }
 else            { return El; }
@@ -29,6 +29,8 @@ do              { return Do; }
 {num}           { yylval.val =   atoi(yytext); return I; }
 {var}           { yylval.id  = strdup(yytext); return V; }
 
-[.\n ]          { ; }
+
+[ \t\n]         { /* ignore whitespace */ }
+[.]             { ; }
 
 %%

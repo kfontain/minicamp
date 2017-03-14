@@ -31,8 +31,8 @@
 debut : C             { execute($1); }
 
 C : C Se Co           { $$ = newast(Se, $1, $3, NULL); }
-  | Co                {;}
-  | FIN               {return 0;}
+  | Co                {  }
+  | FIN               { return 0; }
   ;
 
 E : E PL T            { $$ = newast(Pl, $1, $3, NULL); }
@@ -49,7 +49,7 @@ F : '(' E ')'         { $$ = $2; }
   | V                 { $$ = newvar(V, $1); }
   ;
 
-Co : V AF E           { struct ast* var = newvar(V,$1); $$ = newast(Af, var, $3, NULL); }
+Co : V AF E           { struct ast* var = newvar(V, $1); $$ = newast(Af, var, $3, NULL); }
    | SK C             { $$ = newast(SK, NULL, NULL, NULL); }
    | '(' C ')'        { $$ = $2; }
    | If E Th C El Co  { $$ = newast(If, $2, $3, $5); }

@@ -105,7 +105,22 @@ void treefree(struct ast *a)
 /* traduction IMP -> C3A */
 void compC3A(struct ast *a)
 {
-  //Todo
+    printf("Code C3A :\n");
+    printf("----------\n");
+
+    while (a->l != NULL) {
+        switch (a->nodetype) {
+            case Pl  : printf("nodetype : Pl ");
+            case Mo  : printf("nodetype : Mo ");
+            case Mu  : printf("nodetype : Mu ");
+            case Af  : printf("nodetype : Af ");
+            default : break;
+        }
+        printf("%s ", ((struct var*)a->l)->id);
+        printf("%s ", ((struct var*)a->m)->id);
+        printf("\n");
+        a = a->l;
+    }
 }
 
 /* traduction C3A -> Y86 */
