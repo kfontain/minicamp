@@ -78,6 +78,7 @@ BILQUAD compC3A(struct ast *a, int *ct, int *et)
     if (a) { // a != NULL
         char *arg1, *arg2, *dest;
         char *etiq = Idalloc();
+        BILQUAD last = bilquad_vide();
         int op;
         switch (a->nodetype) {
             case Pl :
@@ -93,7 +94,8 @@ BILQUAD compC3A(struct ast *a, int *ct, int *et)
                 sprintf(etiq, "ET%d", (*et)++);
                 BILQUAD res = creer_bilquad(creer_quad(etiq, op, arg1, arg2, dest));
                 val1 = concatq(val1, val2);
-                return concatq(val1, res);
+                last = concatq(val1, res);
+                break;
             case I  :
                 op = Afc;
                 arg1 = Idalloc();
@@ -101,12 +103,14 @@ BILQUAD compC3A(struct ast *a, int *ct, int *et)
                 sprintf(arg1, "%0.2f", (((struct num *)a)->val));
                 sprintf(dest, "CT%d", (*ct)++);
                 sprintf(etiq, "ET%d", (*et)++);
-                return creer_bilquad(creer_quad(etiq, op, arg1, NULL, dest));
+                last = creer_bilquad(creer_quad(etiq, op, arg1, NULL, dest));
+                break;
             case V  :
                 op = Sk;
                 dest = (((struct var *)a)->id);
                 sprintf(etiq, "ET%d", (*et)++);
-                return creer_bilquad(creer_quad(etiq, op, NULL, NULL, dest));
+                last = creer_bilquad(creer_quad(etiq, op, NULL, NULL, dest));
+                break;
             case Af :
                 op = Af;
                 BILQUAD tmp = compC3A(a->m, ct, et);
@@ -114,11 +118,13 @@ BILQUAD compC3A(struct ast *a, int *ct, int *et)
                 arg2 = tmp.fin->RES;
                 sprintf(etiq, "ET%d", (*et)++);
                 BILQUAD bq = creer_bilquad(creer_quad(etiq, op, arg1, arg2, NULL));
-                return concatq(tmp, bq);
+                last = concatq(tmp, bq);
+                break;
             case Sk :
-                return creer_bilquad(creer_quad("", Sk, NULL, NULL, NULL));
+                last = creer_bilquad(creer_quad("", Sk, NULL, NULL, NULL));
+                break;
             case Se :
-                return(concatq(compC3A(a->l, ct, et), compC3A(a->m, ct, et)));
+                last = (concatq(compC3A(a->l, ct, et), compC3A(a->m, ct, et)));
                 break;
             case If :
                 op = Jz;
@@ -133,7 +139,8 @@ BILQUAD compC3A(struct ast *a, int *ct, int *et)
                 if1 = concatq(if1, if2);
                 if1 = concatq(if1, creer_bilquad(creer_quad("", op, NULL, NULL, etiq)));
                 if1 = concatq(if1, if3);
-                return concatq(if1, creer_bilquad(creer_quad(etiq, Sk, NULL, NULL, NULL)));
+                last = concatq(if1, creer_bilquad(creer_quad(etiq, Sk, NULL, NULL, NULL)));
+                break;
             case Wh :
                 op = Jz;
                 BILQUAD wh1 = compC3A(a->l, ct, et);
@@ -145,19 +152,17 @@ BILQUAD compC3A(struct ast *a, int *ct, int *et)
                 wh1 = concatq(wh1, wh2);
                 op = Jp;
                 wh1 = concatq(wh1,creer_bilquad(creer_quad("", op, NULL, NULL, dest)));
-                return concatq(wh1, creer_bilquad(creer_quad(etiq, Sk, NULL, NULL, NULL)));
-
-
-
-
-            break;
+                last = concatq(wh1, creer_bilquad(creer_quad(etiq, Sk, NULL, NULL, NULL)));
+                break;
         }
+        return last;
     }
 }
 
 /* traduction C3A -> Y86 */
 void debutY86()
 {
+  printf("\n");
   printf("                  .pos      0         #debut zone code\n");
   printf("INIT      :irmovl Data,     %%edx      #adresse de la zone de donnees\n");
   printf("           irmovl 256,      %%eax      #espace pile\n");
@@ -207,12 +212,124 @@ void finY86()
   printf("Data      :\n");
 }
 
-void compY86(struct ast *a)
+BILQUAD compY86(BILQUAD src)
 {
-  debutY86();
-  printf("##### code a fournir ####\n");
-  printf("#########################\n");
-  finY86();
+    BILQUAD y86 = bilquad_vide();
+    QUAD tmp = src.debut;
+    char* s = Idalloc();
+    int offset = 4;
+    ENV envy = NULL;
+    BILQUAD bquad;
+    QUAD quad;
+    while (tmp) { // != NULL
+        switch (tmp->OP) {
+            case Pl :
+            case Mo :
+                sprintf(s, "%d(%%edx),", valch(envy, tmp->ARG1));
+                quad = creer_quad(tmp->ETIQ, null, "mrmovl", s, "%%eax");
+                bquad = creer_bilquad(quad);
+                sprintf(s, "%d(%%edx),", valch(envy, tmp->ARG2));
+                quad = creer_quad("", null, "mrmovl", s, "%%ebx");
+                bquad = concatq(bquad, creer_bilquad(quad));
+                char *plmo = (tmp->OP == Pl) ? "addl":"subl";
+                quad = creer_quad("", null, plmo, "%%eax", "%%ebx");
+                bquad = concatq(bquad, creer_bilquad(quad));
+                initenv(&envy, tmp->RES);
+                affect(envy, tmp->RES, offset);
+                sprintf(s, "%d(%%edx),", offset);
+                offset = offset + 4;
+                quad = creer_quad("", null, "rmmovl", "%%eax", s);
+                bquad = concatq(bquad, creer_bilquad(quad));
+                y86 = concatq(y86, bquad);
+                break;
+            case Mu :
+                sprintf(s, "%d(%%edx),", valch(envy, tmp->ARG1));
+                quad = creer_quad(tmp->ETIQ, null, "mrmovl", s, "%%eax");
+                bquad = creer_bilquad(quad);
+                sprintf(s, "%d(%%edx),", valch(envy, tmp->ARG2));
+                quad = creer_quad("", null, "mrmovl", s, "%%ebx");
+                bquad = concatq(bquad, creer_bilquad(quad));
+                quad = creer_quad("", null, "pushl", "%%ebx", NULL);
+                bquad = concatq(bquad, creer_bilquad(quad));
+                quad = creer_quad("", null, "pushl", "%%eax", NULL);
+                bquad = concatq(bquad, creer_bilquad(quad));
+                quad = creer_quad("", null, "call", "MUL", NULL);
+                bquad = concatq(bquad, creer_bilquad(quad));
+                quad = creer_quad("", null, "popl", "%%eax", NULL);
+                bquad = concatq(bquad, creer_bilquad(quad));
+                quad = creer_quad("", null, "popl", "%%ebx", NULL);
+                bquad = concatq(bquad, creer_bilquad(quad));
+                quad = creer_quad("", null, "mrmovl", "0(%%edx)", "%%eax");
+                bquad = concatq(bquad, creer_bilquad(quad));
+                sprintf(s, "%d(%%edx)", offset);
+                initenv(&envy, tmp->RES);
+                affect(envy, tmp->RES, offset);
+                offset = offset + 4;
+                quad = creer_quad("", null, "rmmovl", "%%eax,", s);
+                bquad = concatq(bquad, creer_bilquad(quad));
+                y86 = concatq(y86, bquad);
+                break;
+            case Af :
+                sprintf(s, "%d(%%edx),", valch(envy, tmp->ARG2));
+                quad = creer_quad(tmp->ETIQ, null, "mrmovl", s, "%%eax");
+                bquad = creer_bilquad(quad);
+                if ((rech(tmp->ARG1, envy))) { // == NULL
+                    sprintf(s, "%d(%%edx)", valch(envy, tmp->ARG1));
+                }
+                else {
+                    initenv(&envy, tmp->ARG1);
+                    affect(envy, tmp->ARG1, offset);
+                    sprintf(s, "%d(%%edx)", offset);
+                    offset = offset + 4;
+                }
+                quad = creer_quad("", null, "rmmovl", "%eax,", s);
+                bquad = concatq(bquad, creer_bilquad(quad));
+                y86 = concatq(y86, bquad);
+                break;
+            case Afc :
+                sprintf(s, "%s,", tmp->ARG1);
+                quad = creer_quad(tmp->ETIQ, null, "irmovl", s, "%%eax");
+                bquad = creer_bilquad(quad);
+                initenv(&envy, tmp->RES);
+                affect(envy, tmp->RES, offset);
+                sprintf(s, "%d(%%edx)", offset);
+                offset = offset + 4;
+                quad = creer_quad("", null, "rmmovl", "%%eax,", s);
+                bquad = concatq(bquad, creer_bilquad(quad));
+                y86 = concatq(y86, bquad);
+                break;
+            case Sk :
+                y86 = concatq(y86, creer_bilquad(creer_quad(tmp->ETIQ, null, "nop", NULL, NULL)));
+                if(tmp->RES != NULL){
+                    if(rech(tmp->RES, envy) == NULL) {
+                        initenv(&envy, tmp->RES);
+                        affect(envy, tmp->RES, offset);
+                        sprintf(s, "%d(%%edx)", offset);
+                        offset = offset + 4;
+                    }
+                }
+                break;
+            case St :
+                y86 = concatq(y86, creer_bilquad(creer_quad(tmp->ETIQ, null, "halt", NULL, NULL)));
+                break;
+            case Jz :
+            	sprintf(s, "%d(%%edx),", valch(envy, tmp->ARG1));
+            	quad = creer_quad(tmp->ETIQ, null, "mrmovl", s, "%%eax");
+            	bquad = creer_bilquad(quad);
+            	quad = creer_quad("", null, "andl", "%%eax", "%%eax");
+            	bquad = concatq(bquad, creer_bilquad(quad));
+            	quad = creer_quad("", null, "je", tmp->RES, NULL);
+            	bquad = concatq(bquad, creer_bilquad(quad));
+            	y86 = concatq(y86, bquad);
+            	break;
+            case Jp :
+                quad = creer_quad(tmp->ETIQ, null, "jump", tmp->RES, NULL);
+                y86 = concatq(y86, creer_bilquad(quad));
+                break;
+        }
+        tmp = tmp->SUIV;
+    }
+    return y86;
 }
 
 
@@ -220,15 +337,19 @@ void compY86(struct ast *a)
 void execute(struct ast *a)
 {
     printf("\n##### Arbre syntaxe abstrait ######\n\n");
+    printf("Mp ");
     DFSread(a);
     printf("\n\n##### Code C3A ######\n\n");
-    BILQUAD bq = bilquad_vide();
+    BILQUAD c3a = bilquad_vide();
     int ct = 0, et = 0;
-    bq = compC3A(a, &ct, &et);
-    bq = concatq(bq, creer_bilquad(creer_quad("", St, NULL, NULL, NULL)));
-    ecrire_bilquad(bq);
+    c3a = compC3A(a, &ct, &et);
+    c3a = concatq(c3a, creer_bilquad(creer_quad("", St, NULL, NULL, NULL)));
+    ecrire_bilquad(c3a);
     printf("\n##### Code y86 ######\n");
-    //compY86(a);
+    debutY86();
+    BILQUAD y86 = compY86(c3a);
+    ecrire_bilquad(y86);
+    finY86();
     printf("\n");
     //treefree(a);
 }

@@ -47,7 +47,7 @@ void treefree(struct ast *a);
 BILQUAD compC3A(struct ast *a, int *ct, int *et);
 
 /*C3A -> Y86*/
-void compY86(struct ast *a);
+BILQUAD compY86(BILQUAD src);
 
 /*executable*/
 void execute(struct ast *a);
