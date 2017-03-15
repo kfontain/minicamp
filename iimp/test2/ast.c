@@ -47,28 +47,34 @@ void DFSread(struct ast *a) {
             case Pl  : printf("Pl "); break;
             case Mo  : printf("Mo "); break;
             case Mu  : printf("Mu "); break;
+            case Sk  : printf("Sk "); break;
+            case Se  : printf("Se "); break;
+            case If  : printf("IfThEl "); break;
+            case Wh  : printf("Wh "); break;
+            case Do  : printf("Do "); break;
             case Af  : printf("Af "); break;
-            case V : printf("node : %s ", ((struct var*)a)->id); break;
+
+            case I   : printf("%0.2f ", ((struct num*)a)->val); break;
+            case V   : printf("%s ", ((struct var*)a)->id) ; break;
         }
-        if (a->nodetype != V && a->l) {
+        if (a->nodetype != V && a-> nodetype != I && a->l) {
             DFSread(a->l);
         }
-        if (a->nodetype != V && a->m) {
+        if (a->nodetype != V && a-> nodetype != I && a->m) {
             DFSread(a->m);
         }
-        if (a->nodetype != V && a->r) {
+        if (a->nodetype != V && a-> nodetype != I && a->r) {
             DFSread(a->r);
         }
     }
-    printf("\n");
 }
 
 /* lecture AST */
 void readAST(struct ast *a)
 {
-    printf("début read \n");
+    printf("\n");
     DFSread(a);
-    printf("fin read \n");
+    printf("\n");
 }
 
 /* Suppression AST */

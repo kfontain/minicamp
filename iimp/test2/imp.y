@@ -51,8 +51,8 @@ F : '(' E ')'         { $$ = $2; }
 Co : V Af E           { struct ast* var = newvar(V, $1); $$ = newast(Af, var, $3, NULL); }
    | Sk Se C          { $$ = newast(Sk, NULL, NULL, NULL); }
    | '(' C ')'        { $$ = $2; }
-   | If E Th C El Co  { $$ = newast(If, $2, $3, $5); }
-   | Wh E Do Co       { }
+   | If E Th C El Co  { $$ = newast(If, $2, $4, $6); }
+   | Wh E Do Co       { $$ = newast(Wh, $2, $4, NULL); }
    ;
 
 %%

@@ -30,6 +30,6 @@ do              { return Do; }
 
 
 [ \t\n]         { /* ignore whitespace */ }
-[.]             { ; }
+[.()]             { ; }
 
 %%
