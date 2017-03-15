@@ -102,7 +102,7 @@ char *nomop(int codop)
 /* affiche le quadruplet (pour generer code); puis saute a la ligne */
 void ecrire_quad(QUAD qd)
 { if(strcmp(qd->ETIQ,"") == 0)       /* etiquette= mot vide */
-    {printf("%-10s ","");}
+    {printf("%-10s","");}
   else
     {printf("%-10s:",qd->ETIQ);}
   printf("%-6s: ",nomop(qd->OP));

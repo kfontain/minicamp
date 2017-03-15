@@ -76,6 +76,11 @@ variable  VAchiffre|[A-Z][A-Za-z0-9\-\_]*
                                                       }; QUAD q = creer_quad(ETIQ, OP, ARG1, ARG2, RES); BILQUAD bq2 = creer_bilquad(q); bq = concatq(bq,bq2); ETIQ =""; ARG1 = ""; ARG2 = ""; RES = ""; BEGIN INITIAL;}
 
 
+<INITIAL>\t  {;}
+<Argument1>\t  {;}
+<Argument2>\t  {;}
+<Destination>\t  {;}
+
 %%
 
 int main()

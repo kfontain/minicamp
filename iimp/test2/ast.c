@@ -105,7 +105,7 @@ void treefree(struct ast *a)
 /* traduction IMP -> C3A */
 void compC3A(struct ast *a)
 {
-    printf("Code C3A :\n");
+  /* printf("Code C3A :\n");
     printf("----------\n");
 
     while (a->l != NULL) {
@@ -120,13 +120,68 @@ void compC3A(struct ast *a)
         printf("%s ", ((struct var*)a->m)->id);
         printf("\n");
         a = a->l;
-    }
+	}*/
 }
 
 /* traduction C3A -> Y86 */
+void debutY86()
+{
+  printf("                  .pos      0         #debut zone code\n"); 
+  printf("INIT      :irmovl Data,     %%edx      #adresse de la zone de donnees\n");
+  printf("           irmovl 256,      %%eax      #espace pile\n");
+  printf("           addl   %%edx,     %%eax\n");                
+  printf("           rrmovl %%eax,     %%esp      #init pile\n"); 
+  printf("           rrmovl %%eax,     %%ebp\n");                
+  printf("ET1       :nop                        #trad Sk                         X2\n");        
+}
+
+void finY86()
+{
+  printf("MUL       :nop                        #ssprog mult:M[M[%%edx]]:=X*Y\n");
+  printf("           mrmovl 4(%%esp), %%eax       #A := X\n");   
+  printf("           mrmovl 8(%%esp), %%ebx       # B:= Y\n");   
+  printf("           andl   %%eax,    %%eax       # si A==0 return 0\n");
+  printf("           je     END\n");                           
+  printf("SIGN      :nop                        #si A <= 0 alors (X:= -A,Y:= -B)\n");
+  printf("           jg     MULPLUS             #cas ou A > 0\n");
+  printf("           irmovl 0,       %%ecx\n");                
+  printf("           subl   %%eax,    %%ecx\n");                
+  printf("           rrmovl %%ecx,    %%eax\n");                
+  printf("           rmmovl %%eax,    4(%%esp)    #X := -A\n");  
+  printf("           irmovl 0,       %%ecx\n");                
+  printf("           subl   %%ebx,    %%ecx\n");                
+  printf("           rrmovl %%ecx,    %%ebx\n");                
+  printf("           rmmovl %%ebx,    8(%%esp)    #Y := -B\n");  
+  printf("MULPLUS   :nop                        #ssprog X>0->M[M[%edx]]:=X*Y\n");
+  printf("           mrmovl 4(%%esp), %%eax       #A := X\n");   
+  printf("           andl   %%eax,    %%eax       # si X==0 return 0\n");
+  printf("           je     END\n");                           
+  printf("           irmovl 1,       %%esi       # A:=A-1\n");  
+  printf("           subl   %%esi,    %%eax\n");                
+  printf("           mrmovl 8(%%esp), %%ebx       # B:= Y\n");   
+  printf("           pushl  %%ebx                # empiler B, puis A\n");
+  printf("           pushl  %%eax\n");                          
+  printf("           call   MULPLUS             # M[%%edx]:= A * B=(X-1) * Y\n");
+  printf("           popl   %%eax                # depiler A puis B\n");
+  printf("           popl   %%eax\n");                          
+  printf("           mrmovl 0(%%edx),  %%eax      # M[%%edx]:= M[%%edx] + Y\n");
+  printf("           mrmovl 8(%%esp),  %%ebx\n");                
+  printf("           addl   %%ebx,     %%eax\n");                
+  printf("           rmmovl %%eax,     0(%%edx)   #end MUL(X<>0) ret(Z)\n");
+  printf("           ret\n");                                  
+  printf("END       :irmovl 0,        %%eax      #end MUL(X==0) ret(Z)\n");
+  printf("           rmmovl %%eax,     0(%%edx)\n");             
+  printf("           ret\n");                                  
+  printf("                .align    8           #debut zone donnees\n");
+  printf("Data      :\n");
+}
+
 void compY86(struct ast *a)
 {
-  //Todo
+  debutY86();
+  printf("##### code a fournir ####\n");
+  printf("#########################\n");
+  finY86();
 }
 
 
@@ -134,11 +189,11 @@ void compY86(struct ast *a)
 void execute(struct ast *a)
 {
     readAST(a);
-    printf("\n");
-    //evalAST(a);
     //printf("\n");
+    //evalAST(a);
+    printf("\n########## Code C3A ########\n");
     compC3A(a);
-    printf("\n");
+    printf("\n########### Code y86 #######\n");
     compY86(a);
     printf("\n");
     treefree(a);
