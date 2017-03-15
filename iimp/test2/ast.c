@@ -41,23 +41,23 @@ struct ast* newvar(int nodetype, char* id)
    return (struct ast*)v;
 }
 
-void DFS(struct ast *a) {
+void DFSread(struct ast *a) {
     if (a) {
         switch (a->nodetype) {
-            case Pl  : printf("node : Pl "); break;
-            case Mo  : printf("node : Mo "); break;
-            case Mu  : printf("node : Mu "); break;
-            case Af  : printf("node : Af "); break;
-            case 271 : printf("node : %s ", ((struct var*)a)->id); break;
+            case Pl  : printf("Pl "); break;
+            case Mo  : printf("Mo "); break;
+            case Mu  : printf("Mu "); break;
+            case Af  : printf("Af "); break;
+            case V : printf("node : %s ", ((struct var*)a)->id); break;
         }
-        if (a->nodetype != 271 && a->l) {
-            DFS(a->l);
+        if (a->nodetype != V && a->l) {
+            DFSread(a->l);
         }
-        if (a->nodetype != 271 && a->m) {
-            DFS(a->m);
+        if (a->nodetype != V && a->m) {
+            DFSread(a->m);
         }
-        if (a->nodetype != 271 && a->r) {
-            DFS(a->r);
+        if (a->nodetype != V && a->r) {
+            DFSread(a->r);
         }
     }
     printf("\n");
@@ -67,7 +67,7 @@ void DFS(struct ast *a) {
 void readAST(struct ast *a)
 {
     printf("début read \n");
-    DFS(a);
+    DFSread(a);
     printf("fin read \n");
 }
 
@@ -151,7 +151,7 @@ void finY86()
   printf("           subl   %%ebx,    %%ecx\n");
   printf("           rrmovl %%ecx,    %%ebx\n");
   printf("           rmmovl %%ebx,    8(%%esp)    #Y := -B\n");
-  printf("MULPLUS   :nop                        #ssprog X>0->M[M[%edx]]:=X*Y\n");
+  printf("MULPLUS   :nop                        #ssprog X>0->M[M[%%edx]]:=X*Y\n");
   printf("           mrmovl 4(%%esp), %%eax       #A := X\n");
   printf("           andl   %%eax,    %%eax       # si X==0 return 0\n");
   printf("           je     END\n");
@@ -191,7 +191,7 @@ void execute(struct ast *a)
     printf("\n########## Code C3A ########\n");
     compC3A(a);
     printf("\n########### Code y86 #######\n");
-    compY86(a);
+    //compY86(a);
     printf("\n");
     treefree(a);
 }

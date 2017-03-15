@@ -14,7 +14,7 @@
   char* id;
 }
 
-%token<a> PL MO MU If Th El Wh Do Se SK AF
+%token<a> Pl Mo Mu If Th El Wh Do Se Sk Af
 %token<val> I
 %token<id>  V
 
@@ -34,12 +34,12 @@ C : C Se Co           { $$ = newast(Se, $1, $3, NULL); }
   | Co                {  }
   ;
 
-E : E PL T            { $$ = newast(Pl, $1, $3, NULL); }
-  | E MO T            { $$ = newast(Mo, $1, $3, NULL); }
+E : E Pl T            { $$ = newast(Pl, $1, $3, NULL); }
+  | E Mo T            { $$ = newast(Mo, $1, $3, NULL); }
   | T                 { }
   ;
 
-T : T MU F            { $$ = newast(Mu, $1, $3, NULL); }
+T : T Mu F            { $$ = newast(Mu, $1, $3, NULL); }
   | F                 { ; }
   ;
 
@@ -48,8 +48,8 @@ F : '(' E ')'         { $$ = $2; }
   | V                 { $$ = newvar(V, $1); }
   ;
 
-Co : V AF E           { struct ast* var = newvar(V, $1); $$ = newast(Af, var, $3, NULL); }
-   | SK C             { $$ = newast(SK, NULL, NULL, NULL); }
+Co : V Af E           { struct ast* var = newvar(V, $1); $$ = newast(Af, var, $3, NULL); }
+   | Sk C             { $$ = newast(Sk, NULL, NULL, NULL); }
    | '(' C ')'        { $$ = $2; }
    | If E Th C El Co  { $$ = newast(If, $2, $3, $5); }
    | Wh E Do Co       { }

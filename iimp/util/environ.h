@@ -1,6 +1,8 @@
 /* environ.h */
 #ifndef ENVIRON_H
-#define ENVIRON_H 
+#define ENVIRON_H
+
+#include "../test2/imp.tab.h"
 /* ----------------------------types--------------------------------------------*/
 /* environnement := liste de couples (identificateur, entier) */
 typedef struct cellenv{
@@ -22,13 +24,5 @@ extern int valch(ENV rho, char *var); /* valeur de var dans envirnt rho         
 /* ------------------CONSTANTES -------------------------------------------------*/
 #define MAXIDENT 16          /* long max d'un identificateur de variable         */
 #define MAXQUAD  5*MAXIDENT  /* long max d'un quadruplet c3a                     */
-#define Pl 257
-#define Mo 258
-#define Mu 259
-#define Af 260
-#define Afc 261
-#define Sk 262
-#define Jp 263
-#define Jz 264
-#define St 265
+
 #endif
