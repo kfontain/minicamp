@@ -16,6 +16,10 @@
 QUAD creer_quad(char *etiq,int op,char *arg1,char *arg2,char *res)
 {QUAD qd;int lres;
   qd=(struct cellquad *)malloc(sizeof(struct cellquad));
+  qd->ETIQ = NULL;
+  qd->ARG1 = NULL;
+  qd->ARG2 = NULL;
+  qd->RES = NULL;
   if (etiq !=NULL)
     {qd->ETIQ=Idalloc();
       strcpy(qd->ETIQ,etiq);}
@@ -34,14 +38,14 @@ QUAD creer_quad(char *etiq,int op,char *arg1,char *arg2,char *res)
 }
 
 /* retourne une biliste vide  */
-BILQUAD bilquad_vide() 
+BILQUAD bilquad_vide()
 {BILQUAD bq;
   bq.debut=NULL;bq.fin=NULL;
   return(bq);
 }
 
 /* retourne une biliste a un element  */
-BILQUAD creer_bilquad(QUAD qd) 
+BILQUAD creer_bilquad(QUAD qd)
 {BILQUAD bq;
   bq.debut=qd;bq.fin=qd;
   return(bq);
@@ -77,7 +81,7 @@ BILQUAD concatq(BILQUAD bq1, BILQUAD bq2)
         bq.fin=bq2.fin;
         return(bq);}
     else
-      return(bq1);  
+      return(bq1);
   else
     return(bq2);
 }
@@ -94,7 +98,7 @@ char *nomop(int codop)
     case(Afc): return("Afc");
     case(St): return("St");
     case(Jp): return("Jp");
-    case(Jz): return("Jz");  
+    case(Jz): return("Jz");
     default:return(NULL);
     };
 }
@@ -102,18 +106,18 @@ char *nomop(int codop)
 /* affiche le quadruplet (pour generer code); puis saute a la ligne */
 void ecrire_quad(QUAD qd)
 { if(strcmp(qd->ETIQ,"") == 0)       /* etiquette= mot vide */
-    {printf("%-10s","");}
+    {printf("%-10s:","");}
   else
     {printf("%-10s:",qd->ETIQ);}
-  printf("%-6s: ",nomop(qd->OP));
+  printf("%-6s:",nomop(qd->OP));
   if (qd->ARG1!=NULL)
     {printf("%-10s:",qd->ARG1);}
   else
-    {printf("%-10s","");}
+    {printf("%-10s:","");}
   if (qd->ARG2!=NULL)
     {printf("%-10s:",qd->ARG2);}
   else
-    {printf("%-10s","");}
+    {printf("%-10s:","");}
   if (qd->RES!=NULL)
     {printf("%-10s\n",qd->RES);}
   else
@@ -128,5 +132,3 @@ void ecrire_bilquad(BILQUAD bq)
     {ecrire_quad(qcour);
       qcour=qcour->SUIV;}
 }
-
-

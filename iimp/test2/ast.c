@@ -45,9 +45,9 @@ struct ast* newvar(int nodetype, char* id)
 void DFSread(struct ast *a) {
     if (a) { // a != NULL
         switch (a->nodetype) {
-            case Pl  : printf("Pl "); break;
-            case Mo  : printf("Mo "); break;
-            case Mu  : printf("Mu "); break;
+            case Pl  : printf("+ "); break;
+            case Mo  : printf("- "); break;
+            case Mu  : printf("* "); break;
             case Sk  : printf("Sk "); break;
             case Se  : printf("Se "); break;
             case If  : printf("IfThEl "); break;
@@ -73,70 +73,86 @@ void DFSread(struct ast *a) {
 /* Depth first search algorithm for C3A compiler */
 
 /* traduction IMP -> C3A */
-void compC3A(struct ast *a, BILQUAD *bq, int ct, int et)
+BILQUAD compC3A(struct ast *a, int *ct, int *et)
 {
     if (a) { // a != NULL
         char *arg1, *arg2, *dest;
+        char *etiq = Idalloc();
         int op;
         switch (a->nodetype) {
             case Pl :
             case Mo :
             case Mu :
                 op = a->nodetype;
-                if (a->l->nodetype == I) {
-                    struct num *tmp = (struct num *)a->l;
-                    sprintf(arg1, "%0.2f", tmp->val);
-                }
-                else if (a->l->nodetype == V) {
-                    struct var *tmp = (struct var *)a->l;
-                    sprintf(arg1, "%s", tmp->id);
-                }
-                else {
-                    sprintf(arg1, "CT%d", ct);
-                    ct++;
-                }
-                QUAD qd = creer_quad(NULL, op, arg1, arg2, NULL);
-                BILQUAD bq2 = creer_bilquad(qd);
-                *bq = concatq(*bq, bq2);
-                break;
+                dest = Idalloc();
+                BILQUAD val1 = compC3A(a->l, ct, et);
+                BILQUAD val2 = compC3A(a->m, ct, et);
+                arg1 = val1.fin->RES;
+                arg2 = val2.fin->RES;
+                sprintf(dest, "CT%d", (*ct)++);
+                sprintf(etiq, "ET%d", (*et)++);
+                BILQUAD res = creer_bilquad(creer_quad(etiq, op, arg1, arg2, dest));
+                val1 = concatq(val1, val2);
+                return concatq(val1, res);
+            case I  :
+                op = Afc;
+                arg1 = Idalloc();
+                dest = Idalloc();
+                sprintf(arg1, "%0.2f", (((struct num *)a)->val));
+                sprintf(dest, "CT%d", (*ct)++);
+                sprintf(etiq, "ET%d", (*et)++);
+                return creer_bilquad(creer_quad(etiq, op, arg1, NULL, dest));
+            case V  :
+                op = Sk;
+                dest = (((struct var *)a)->id);
+                sprintf(etiq, "ET%d", (*et)++);
+                return creer_bilquad(creer_quad(etiq, op, NULL, NULL, dest));
             case Af :
-                if (a->l->nodetype == I) {
-                    op = Afc;
-                    struct num *tmp = (struct num *)a->l;
-                    sprintf(arg1, "%0.2f", tmp->val);
-                    QUAD qd = creer_quad(NULL, op, arg1, NULL, dest);
-                    BILQUAD bq2 = creer_bilquad(qd);
-                    *bq = concatq(*bq, bq2);
-                }
-                else if (a->l->nodetype == V) {
-                    op = Af;
-                    struct var *tmp = (struct var *)a->l;
-                    sprintf(dest, "%s", tmp->id);
-                    QUAD qd = creer_quad(NULL, op, arg1, arg2, NULL);
-                    BILQUAD bq2 = creer_bilquad(qd);
-                    *bq = concatq(*bq, bq2);
-                }
-                else {
-                    op = Af;
-                    sprintf(dest, "CT%d", ct);
-                    ct++;
-                    QUAD qd = creer_quad(NULL, op, arg1, arg2, NULL);
-                    BILQUAD bq2 = creer_bilquad(qd);
-                    *bq = concatq(*bq, bq2);
-                }
+                op = Af;
+                BILQUAD tmp = compC3A(a->m, ct, et);
+                arg1 = (((struct var *)a->l)->id);
+                arg2 = tmp.fin->RES;
+                sprintf(etiq, "ET%d", (*et)++);
+                BILQUAD bq = creer_bilquad(creer_quad(etiq, op, arg1, arg2, NULL));
+                return concatq(tmp, bq);
+            case Sk :
+                return creer_bilquad(creer_quad("", Sk, NULL, NULL, NULL));
+            case Se :
+                return(concatq(compC3A(a->l, ct, et), compC3A(a->m, ct, et)));
                 break;
-        }
-        if (a->nodetype != V && a-> nodetype != I && a->l) {
-            compC3A(a->l, bq, ct, et);
-        }
-        if (a->nodetype != V && a-> nodetype != I && a->m) {
-            compC3A(a->m, bq, ct, et);
-        }
-        if (a->nodetype != V && a-> nodetype != I && a->r) {
-            compC3A(a->r, bq, ct, et);
+            case If :
+                op = Jz;
+                BILQUAD if1 = compC3A(a->l, ct, et);
+                BILQUAD if2 = compC3A(a->m, ct, et);
+                BILQUAD if3 = compC3A(a->r, ct, et);
+                arg1 = if1.fin->RES;
+                dest = if3.debut->ETIQ;
+                if1 = concatq(if1,creer_bilquad(creer_quad("", op, arg1, NULL, dest)));
+                sprintf(etiq, "ET%d", (*et)++);
+                op = Jp;
+                if1 = concatq(if1, if2);
+                if1 = concatq(if1, creer_bilquad(creer_quad("", op, NULL, NULL, etiq)));
+                if1 = concatq(if1, if3);
+                return concatq(if1, creer_bilquad(creer_quad(etiq, Sk, NULL, NULL, NULL)));
+            case Wh :
+                op = Jz;
+                BILQUAD wh1 = compC3A(a->l, ct, et);
+                BILQUAD wh2 = compC3A(a->m, ct, et);
+                sprintf(etiq, "ET%d", (*et)++);
+                arg1 = wh1.fin->RES;
+                dest = wh1.debut->ETIQ;
+                wh1 = concatq(wh1,creer_bilquad(creer_quad("", op, arg1, NULL, etiq)));
+                wh1 = concatq(wh1, wh2);
+                op = Jp;
+                wh1 = concatq(wh1,creer_bilquad(creer_quad("", op, NULL, NULL, dest)));
+                return concatq(wh1, creer_bilquad(creer_quad(etiq, Sk, NULL, NULL, NULL)));
+
+
+
+
+            break;
         }
     }
-
 }
 
 /* traduction C3A -> Y86 */
@@ -203,11 +219,13 @@ void compY86(struct ast *a)
 /* Executable */
 void execute(struct ast *a)
 {
+    printf("\n##### Arbre syntaxe abstrait ######\n\n");
     DFSread(a);
-    printf("\n##### Code C3A ######\n");
+    printf("\n\n##### Code C3A ######\n\n");
     BILQUAD bq = bilquad_vide();
     int ct = 0, et = 0;
-    compC3A(a, &bq, ct, et);
+    bq = compC3A(a, &ct, &et);
+    bq = concatq(bq, creer_bilquad(creer_quad("", St, NULL, NULL, NULL)));
     ecrire_bilquad(bq);
     printf("\n##### Code y86 ######\n");
     //compY86(a);

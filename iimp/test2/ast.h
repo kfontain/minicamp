@@ -44,8 +44,7 @@ ENV evalAST(struct ast *a);
 void treefree(struct ast *a);
 
 /*Imp -> C3A*/
-void compC3A(struct ast *a, BILQUAD *bq, int ct, int et);
-
+BILQUAD compC3A(struct ast *a, int *ct, int *et);
 
 /*C3A -> Y86*/
 void compY86(struct ast *a);
