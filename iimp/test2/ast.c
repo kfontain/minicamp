@@ -71,31 +71,6 @@ void readAST(struct ast *a)
     printf("fin read \n");
 }
 
-/* Evaluation AST */
-/*ENV
-evalAST(struct ast *a)
-{
-  ENV env = Envalloc();
-  double tmp;
-  switch(a->nodetype) {
-  case Pl : tmp = eval(Pl, evalAST(a->l), evalAST(a->m)); break;
-  case Mo : tmp = eval(Mo, evalAST(a->l), evalAST(a->m)); break;
-  case Mu : tmp = eval(Mu, evalAST(a->l), evalAST(a->m)); break;
-  case Af : affect(env, a->l->id, a->m->val); break;
-  case Sk : break;
-  case Se : evalAST(a->l); evalAST(a->m); break;
-  case If : if (a->l->val == 0){evalAST(a->r);} else{ evalAST(a->m);}break;
-  case Th : evalAST(a->l); break;
-  case El : evalAST(a->l); break;
-  case Wh : if(a->l->val != 0) evalAST(a->m); break;
-  case Do : evalAST(a->l); break;
-  case V  : initenv(env, a->id); break;
-  case I  : break;
-  default: printf("internal error: bad node %c\n", a->nodetype);
-  }
-  return env;
-  }*/
-
 /* Suppression AST */
 void treefree(struct ast *a)
 {
@@ -213,8 +188,6 @@ void compY86(struct ast *a)
 void execute(struct ast *a)
 {
     readAST(a);
-    //printf("\n");
-    //evalAST(a);
     printf("\n########## Code C3A ########\n");
     compC3A(a);
     printf("\n########### Code y86 #######\n");
