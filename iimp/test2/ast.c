@@ -41,8 +41,9 @@ struct ast* newvar(int nodetype, char* id)
    return (struct ast*)v;
 }
 
+/* Depth first search algorithm for readAST */
 void DFSread(struct ast *a) {
-    if (a) {
+    if (a) { // a != NULL
         switch (a->nodetype) {
             case Pl  : printf("Pl "); break;
             case Mo  : printf("Mo "); break;
@@ -69,63 +70,73 @@ void DFSread(struct ast *a) {
     }
 }
 
-/* lecture AST */
-void readAST(struct ast *a)
-{
-    printf("\n");
-    DFSread(a);
-    printf("\n");
-}
-
-/* Suppression AST */
-void treefree(struct ast *a)
-{
-  switch(a->nodetype) {
-    /* three subtrees */
-  case 175:
-    treefree(a->l);
-    treefree(a->m);
-    treefree(a->r);
-    /* two subtrees */
-  case Pl :
-  case Mo :
-  case Mu :
-  case Af :
-  case 184 :
-  case 191 :
-    treefree(a->l);
-    treefree(a->m);
-    /* one subtree */
-  case 188 :
-  case 177 :
-    treefree(a->l);
-        /* no subtree */
-  case Sk:
-    free(a);
-    break;
-  default: break;
-  }
-}
+/* Depth first search algorithm for C3A compiler */
 
 /* traduction IMP -> C3A */
-void compC3A(struct ast *a)
+void compC3A(struct ast *a, BILQUAD *bq, int ct, int et)
 {
-  /* printf("Code C3A :\n");
-    printf("----------\n");
-
-    while (a->l != NULL) {
+    if (a) { // a != NULL
+        char *arg1, *arg2, *dest;
+        int op;
         switch (a->nodetype) {
-            case Pl  : printf("nodetype : Pl ");
-            case Mo  : printf("nodetype : Mo ");
-            case Mu  : printf("nodetype : Mu ");
-            case Af  : printf("nodetype : Af ");
-            default : break;
+            case Pl :
+            case Mo :
+            case Mu :
+                op = a->nodetype;
+                if (a->l->nodetype == I) {
+                    struct num *tmp = (struct num *)a->l;
+                    sprintf(arg1, "%0.2f", tmp->val);
+                }
+                else if (a->l->nodetype == V) {
+                    struct var *tmp = (struct var *)a->l;
+                    sprintf(arg1, "%s", tmp->id);
+                }
+                else {
+                    sprintf(arg1, "CT%d", ct);
+                    ct++;
+                }
+                QUAD qd = creer_quad(NULL, op, arg1, arg2, NULL);
+                BILQUAD bq2 = creer_bilquad(qd);
+                *bq = concatq(*bq, bq2);
+                break;
+            case Af :
+                if (a->l->nodetype == I) {
+                    op = Afc;
+                    struct num *tmp = (struct num *)a->l;
+                    sprintf(arg1, "%0.2f", tmp->val);
+                    QUAD qd = creer_quad(NULL, op, arg1, NULL, dest);
+                    BILQUAD bq2 = creer_bilquad(qd);
+                    *bq = concatq(*bq, bq2);
+                }
+                else if (a->l->nodetype == V) {
+                    op = Af;
+                    struct var *tmp = (struct var *)a->l;
+                    sprintf(dest, "%s", tmp->id);
+                    QUAD qd = creer_quad(NULL, op, arg1, arg2, NULL);
+                    BILQUAD bq2 = creer_bilquad(qd);
+                    *bq = concatq(*bq, bq2);
+                }
+                else {
+                    op = Af;
+                    sprintf(dest, "CT%d", ct);
+                    ct++;
+                    QUAD qd = creer_quad(NULL, op, arg1, arg2, NULL);
+                    BILQUAD bq2 = creer_bilquad(qd);
+                    *bq = concatq(*bq, bq2);
+                }
+                break;
         }
-        printf("%s ", ((struct var*)a->l)->id);
-        printf("%s ", ((struct var*)a->m)->id);
-        printf("\n");
-        a = a->l;
-	}*/
+        if (a->nodetype != V && a-> nodetype != I && a->l) {
+            compC3A(a->l, bq, ct, et);
+        }
+        if (a->nodetype != V && a-> nodetype != I && a->m) {
+            compC3A(a->m, bq, ct, et);
+        }
+        if (a->nodetype != V && a-> nodetype != I && a->r) {
+            compC3A(a->r, bq, ct, et);
+        }
+    }
+
 }
 
 /* traduction C3A -> Y86 */
@@ -137,7 +148,6 @@ void debutY86()
   printf("           addl   %%edx,     %%eax\n");
   printf("           rrmovl %%eax,     %%esp      #init pile\n");
   printf("           rrmovl %%eax,     %%ebp\n");
-  printf("ET1       :nop                        #trad Sk                         X2\n");
 }
 
 void finY86()
@@ -193,11 +203,50 @@ void compY86(struct ast *a)
 /* Executable */
 void execute(struct ast *a)
 {
-    readAST(a);
-    printf("\n########## Code C3A ########\n");
-    compC3A(a);
-    printf("\n########### Code y86 #######\n");
+    DFSread(a);
+    printf("\n##### Code C3A ######\n");
+    BILQUAD bq = bilquad_vide();
+    int ct = 0, et = 0;
+    compC3A(a, &bq, ct, et);
+    ecrire_bilquad(bq);
+    printf("\n##### Code y86 ######\n");
     //compY86(a);
     printf("\n");
-    treefree(a);
+    //treefree(a);
+}
+
+/* Suppression AST */
+void treefree(struct ast *a)
+{
+  switch(a->nodetype) {
+  /* three subtrees */
+  case If:
+    treefree(a->l);
+    treefree(a->m);
+    treefree(a->r);
+    free(a);
+  /* two subtrees */
+  case Pl :
+  case Mo :
+  case Mu :
+  case Af :
+  case Wh :
+  case Se :
+    treefree(a->l);
+    treefree(a->m);
+    free(a);
+  /* case double */
+  case I  :
+    free((struct num*)a);
+  /* case variable */
+  case V  :
+    free((struct var*)a);
+
+  /* no subtree */
+  case Sk:
+    free(a);
+    break;
+
+  default: break;
+  }
 }
