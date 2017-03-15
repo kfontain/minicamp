@@ -41,10 +41,34 @@ struct ast* newvar(int nodetype, char* id)
    return (struct ast*)v;
 }
 
+void DFS(struct ast *a) {
+    if (a) {
+        switch (a->nodetype) {
+            case Pl  : printf("node : Pl "); break;
+            case Mo  : printf("node : Mo "); break;
+            case Mu  : printf("node : Mu "); break;
+            case Af  : printf("node : Af "); break;
+            case 271 : printf("node : %s ", ((struct var*)a)->id); break;
+        }
+        if (a->nodetype != 271 && a->l) {
+            DFS(a->l);
+        }
+        if (a->nodetype != 271 && a->m) {
+            DFS(a->m);
+        }
+        if (a->nodetype != 271 && a->r) {
+            DFS(a->r);
+        }
+    }
+    printf("\n");
+}
+
 /* lecture AST */
 void readAST(struct ast *a)
 {
-  //Todo
+    printf("début read \n");
+    DFS(a);
+    printf("fin read \n");
 }
 
 /* Evaluation AST */
@@ -126,52 +150,52 @@ void compC3A(struct ast *a)
 /* traduction C3A -> Y86 */
 void debutY86()
 {
-  printf("                  .pos      0         #debut zone code\n"); 
+  printf("                  .pos      0         #debut zone code\n");
   printf("INIT      :irmovl Data,     %%edx      #adresse de la zone de donnees\n");
   printf("           irmovl 256,      %%eax      #espace pile\n");
-  printf("           addl   %%edx,     %%eax\n");                
-  printf("           rrmovl %%eax,     %%esp      #init pile\n"); 
-  printf("           rrmovl %%eax,     %%ebp\n");                
-  printf("ET1       :nop                        #trad Sk                         X2\n");        
+  printf("           addl   %%edx,     %%eax\n");
+  printf("           rrmovl %%eax,     %%esp      #init pile\n");
+  printf("           rrmovl %%eax,     %%ebp\n");
+  printf("ET1       :nop                        #trad Sk                         X2\n");
 }
 
 void finY86()
 {
   printf("MUL       :nop                        #ssprog mult:M[M[%%edx]]:=X*Y\n");
-  printf("           mrmovl 4(%%esp), %%eax       #A := X\n");   
-  printf("           mrmovl 8(%%esp), %%ebx       # B:= Y\n");   
+  printf("           mrmovl 4(%%esp), %%eax       #A := X\n");
+  printf("           mrmovl 8(%%esp), %%ebx       # B:= Y\n");
   printf("           andl   %%eax,    %%eax       # si A==0 return 0\n");
-  printf("           je     END\n");                           
+  printf("           je     END\n");
   printf("SIGN      :nop                        #si A <= 0 alors (X:= -A,Y:= -B)\n");
   printf("           jg     MULPLUS             #cas ou A > 0\n");
-  printf("           irmovl 0,       %%ecx\n");                
-  printf("           subl   %%eax,    %%ecx\n");                
-  printf("           rrmovl %%ecx,    %%eax\n");                
-  printf("           rmmovl %%eax,    4(%%esp)    #X := -A\n");  
-  printf("           irmovl 0,       %%ecx\n");                
-  printf("           subl   %%ebx,    %%ecx\n");                
-  printf("           rrmovl %%ecx,    %%ebx\n");                
-  printf("           rmmovl %%ebx,    8(%%esp)    #Y := -B\n");  
+  printf("           irmovl 0,       %%ecx\n");
+  printf("           subl   %%eax,    %%ecx\n");
+  printf("           rrmovl %%ecx,    %%eax\n");
+  printf("           rmmovl %%eax,    4(%%esp)    #X := -A\n");
+  printf("           irmovl 0,       %%ecx\n");
+  printf("           subl   %%ebx,    %%ecx\n");
+  printf("           rrmovl %%ecx,    %%ebx\n");
+  printf("           rmmovl %%ebx,    8(%%esp)    #Y := -B\n");
   printf("MULPLUS   :nop                        #ssprog X>0->M[M[%edx]]:=X*Y\n");
-  printf("           mrmovl 4(%%esp), %%eax       #A := X\n");   
+  printf("           mrmovl 4(%%esp), %%eax       #A := X\n");
   printf("           andl   %%eax,    %%eax       # si X==0 return 0\n");
-  printf("           je     END\n");                           
-  printf("           irmovl 1,       %%esi       # A:=A-1\n");  
-  printf("           subl   %%esi,    %%eax\n");                
-  printf("           mrmovl 8(%%esp), %%ebx       # B:= Y\n");   
+  printf("           je     END\n");
+  printf("           irmovl 1,       %%esi       # A:=A-1\n");
+  printf("           subl   %%esi,    %%eax\n");
+  printf("           mrmovl 8(%%esp), %%ebx       # B:= Y\n");
   printf("           pushl  %%ebx                # empiler B, puis A\n");
-  printf("           pushl  %%eax\n");                          
+  printf("           pushl  %%eax\n");
   printf("           call   MULPLUS             # M[%%edx]:= A * B=(X-1) * Y\n");
   printf("           popl   %%eax                # depiler A puis B\n");
-  printf("           popl   %%eax\n");                          
+  printf("           popl   %%eax\n");
   printf("           mrmovl 0(%%edx),  %%eax      # M[%%edx]:= M[%%edx] + Y\n");
-  printf("           mrmovl 8(%%esp),  %%ebx\n");                
-  printf("           addl   %%ebx,     %%eax\n");                
+  printf("           mrmovl 8(%%esp),  %%ebx\n");
+  printf("           addl   %%ebx,     %%eax\n");
   printf("           rmmovl %%eax,     0(%%edx)   #end MUL(X<>0) ret(Z)\n");
-  printf("           ret\n");                                  
+  printf("           ret\n");
   printf("END       :irmovl 0,        %%eax      #end MUL(X==0) ret(Z)\n");
-  printf("           rmmovl %%eax,     0(%%edx)\n");             
-  printf("           ret\n");                                  
+  printf("           rmmovl %%eax,     0(%%edx)\n");
+  printf("           ret\n");
   printf("                .align    8           #debut zone donnees\n");
   printf("Data      :\n");
 }

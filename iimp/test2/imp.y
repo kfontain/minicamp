@@ -14,7 +14,7 @@
   char* id;
 }
 
-%token<a> PL MO MU If Th El Wh Do Se SK AF FIN
+%token<a> PL MO MU If Th El Wh Do Se SK AF
 %token<val> I
 %token<id>  V
 
@@ -32,7 +32,6 @@ debut : C             { execute($1); }
 
 C : C Se Co           { $$ = newast(Se, $1, $3, NULL); }
   | Co                {  }
-  | FIN               { return 0; }
   ;
 
 E : E PL T            { $$ = newast(Pl, $1, $3, NULL); }
@@ -66,7 +65,7 @@ int yyerror(const char* s)
 
 int main()
 {
-  while(yyparse() != 0);
+  yyparse();
 
   return 0;
 }

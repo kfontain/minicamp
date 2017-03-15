@@ -13,7 +13,6 @@ num [1-9][0-9]*|0
 
 %%
 
-<<EOF>>         { return FIN; }
 "+"             { return PL; }
 "-"             { return MO; }
 "*"             { return MU; }

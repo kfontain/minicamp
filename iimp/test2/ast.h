@@ -2,6 +2,7 @@
  * Declaration de l'AST pour le compilateur IMP
  */
 #include "../util/environ.h"
+#include "../util/bilquad.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
