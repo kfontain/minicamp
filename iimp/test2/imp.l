@@ -13,17 +13,17 @@ num [1-9][0-9]*|0
 
 %%
 
-"+"             { return PL; }
-"-"             { return MO; }
-"*"             { return MU; }
-skip            { return SK; }
+"+"             { return Pl; }
+"-"             { return Mo; }
+"*"             { return Mu; }
+skip            { return Sk; }
 ";"             { return Se; }
 if              { return If; }
 then            { return Th; }
 else            { return El; }
 while           { return Wh; }
 do              { return Do; }
-:=              { return AF; }
+:=              { return Af; }
 
 {num}           { yylval.val =   atoi(yytext); return I; }
 {var}           { yylval.id  = strdup(yytext); return V; }
